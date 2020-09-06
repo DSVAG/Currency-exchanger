@@ -80,8 +80,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun hideKeyboard() {
         try {
-            val editTextInput: InputMethodManager =
-                getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            val inputMethodManager = getSystemService<InputMethodManager>()!!
             editTextInput.hideSoftInputFromWindow(currentFocus!!.windowToken, 0)
         } catch (e: Exception) {
             Log.e(TAG, "closeKeyboard: $e")
