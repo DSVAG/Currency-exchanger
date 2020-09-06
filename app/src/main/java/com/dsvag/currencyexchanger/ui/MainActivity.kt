@@ -1,5 +1,6 @@
 package com.dsvag.currencyexchanger.ui
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.inputmethod.InputMethodManager
@@ -8,8 +9,10 @@ import androidx.core.content.getSystemService
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.dsvag.currencyexchanger.data.adapters.CoinAdapter
+import com.dsvag.currencyexchanger.data.models.latest.Coin
 import com.dsvag.currencyexchanger.data.models.latest.Latest
 import com.dsvag.currencyexchanger.data.network.ApiCoinData
+import com.dsvag.currencyexchanger.data.until.OnItemClickListener
 import com.dsvag.currencyexchanger.databinding.ActivityMainBinding
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Single
@@ -32,7 +35,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initRecyclerview() {
-        binding.recyclerview.setHasFixedSize(true)
+        binding.recyclerview.setHasFixedSize(false)
         binding.recyclerview.layoutManager = LinearLayoutManager(binding.recyclerview.context)
         binding.recyclerview.adapter = adapter
 
@@ -57,7 +60,7 @@ class MainActivity : AppCompatActivity() {
     private fun apiCall() {
         getSingle().subscribe(
             {
-                adapter.setData(it.coins)
+                adapter.setData(it.coins as ArrayList<Coin>)
                 Log.e(TAG, "${it.status.errorCode}")
             },
             {

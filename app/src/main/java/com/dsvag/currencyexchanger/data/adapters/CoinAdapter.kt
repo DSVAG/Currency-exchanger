@@ -4,11 +4,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.dsvag.currencyexchanger.R
 import com.dsvag.currencyexchanger.data.models.latest.Coin
 import com.dsvag.currencyexchanger.data.untils.OnItemClickListener
 import com.dsvag.currencyexchanger.databinding.RowCoinBinding
 
-class CoinAdapter : RecyclerView.Adapter<CoinAdapter.CoinViewHolder>() {
+class CoinAdapter() : RecyclerView.Adapter<CoinAdapter.CoinViewHolder>() {
 
     private var data: MutableList<Coin> = ArrayList()
 
