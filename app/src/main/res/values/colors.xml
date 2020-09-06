@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="Purple">#6200EE</color>
-    <color name="PurpleDark">#3700B3</color>
-    <color name="Aqua">#03DAC5</color>
-    <color name="White">#FFFFFF</color>
-    <color name="GreyLight">#8E8E8E</color>
-    <color name="Grey">#575757</color>
-    <color name="GreyDark">#2E2E2E</color>
-    <color name="Black">#000000</color>
+    <color name="purple">#6200EE</color>
+    <color name="purpleDark">#3700B3</color>
+    <color name="aqua">#03DAC5</color>
+    <color name="white">#FFFFFF</color>
+    <color name="greyLight">#8E8E8E</color>
+    <color name="grey">#575757</color>
+    <color name="greyDark">#2E2E2E</color>
+    <color name="black">#000000</color>
 </resources>

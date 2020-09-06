@@ -1,9 +1,8 @@
 package com.dsvag.currencyexchanger.data.models.latest
 
-
 import com.google.gson.annotations.SerializedName
 
-data class USD(
+data class Usd(
     val price: Double,
     @SerializedName("volume_24h")
     val volume24h: Double,

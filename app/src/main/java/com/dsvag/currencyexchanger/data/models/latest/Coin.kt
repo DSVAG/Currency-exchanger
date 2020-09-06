@@ -24,5 +24,10 @@ data class Coin(
     val cmcRank: Int,
     @SerializedName("last_updated")
     val lastUpdated: String,
-    val quote: Quote
-)
+    val quote: Quote,
+    var isExpand: Boolean = false
+) {
+    fun changeExpand() {
+        isExpand = !isExpand
+    }
+}

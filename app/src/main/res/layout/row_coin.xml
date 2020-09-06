@@ -12,7 +12,7 @@
         android:id="@+id/name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/Black"
+        android:textColor="@color/black"
         android:textSize="20sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -23,7 +23,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:textColor="@color/Grey"
+        android:textColor="@color/grey"
         android:textSize="15sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/name"
@@ -36,7 +36,7 @@
         android:gravity="end"
         android:inputType="numberDecimal"
         android:text="20.0"
-        android:textColor="@color/Black"
+        android:textColor="@color/black"
         android:textSize="20sp"
         app:layout_constraintBottom_toBottomOf="@+id/symbol"
         app:layout_constraintEnd_toEndOf="parent"
@@ -47,7 +47,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="4dp"
-        android:background="@color/White"
+        android:background="@color/white"
         android:orientation="vertical"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -61,7 +61,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="start"
-            android:textColor="@color/Grey"
+            android:textColor="@color/grey"
             android:textSize="15sp"
             tools:text="volume 24h: 7155680000" />
 
@@ -71,7 +71,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:gravity="start"
-            android:textColor="@color/Grey"
+            android:textColor="@color/grey"
             android:textSize="15sp"
             tools:text="change 1h: -0.152774" />
 
@@ -81,7 +81,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:gravity="start"
-            android:textColor="@color/Grey"
+            android:textColor="@color/grey"
             android:textSize="15sp"
             tools:text="change 24h: 0.518894" />
 
@@ -91,7 +91,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:gravity="start"
-            android:textColor="@color/Grey"
+            android:textColor="@color/grey"
             android:textSize="15sp"
             tools:text="change 7d: 0.986573" />
 
@@ -101,7 +101,7 @@
         android:id="@+id/lastUpdate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/Grey"
+        android:textColor="@color/grey"
         android:textSize="15sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

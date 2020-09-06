@@ -1,17 +1,15 @@
 package com.dsvag.currencyexchanger.ui
 
-import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.getSystemService
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.dsvag.currencyexchanger.data.adapters.CoinAdapter
-import com.dsvag.currencyexchanger.data.models.latest.Coin
 import com.dsvag.currencyexchanger.data.models.latest.Latest
 import com.dsvag.currencyexchanger.data.network.ApiCoinData
-import com.dsvag.currencyexchanger.data.until.OnItemClickListener
 import com.dsvag.currencyexchanger.databinding.ActivityMainBinding
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Single
@@ -34,7 +32,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initRecyclerview() {
-        binding.recyclerview.setHasFixedSize(false)
+        binding.recyclerview.setHasFixedSize(true)
         binding.recyclerview.layoutManager = LinearLayoutManager(binding.recyclerview.context)
         binding.recyclerview.adapter = adapter
 
@@ -51,16 +49,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initAdapter() {
-//        adapter.attachCallback(object : OnItemClickListener {
-//            override fun onClick(position: Int) {
-//            }
-//        })
+        adapter.attachCallback {
+            //adapter.changeExpand(it)
+        }
     }
 
     private fun apiCall() {
         getSingle().subscribe(
             {
-                adapter.setData(it.coins as ArrayList<Coin>)
+                adapter.setData(it.coins)
                 Log.e(TAG, "${it.status.errorCode}")
             },
             {
@@ -80,9 +77,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun hideKeyboard() {
         try {
-            val editTextInput: InputMethodManager =
-                getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            editTextInput.hideSoftInputFromWindow(currentFocus!!.windowToken, 0)
+            val inputMethodManager = getSystemService<InputMethodManager>()!!
+            inputMethodManager.hideSoftInputFromWindow(currentFocus!!.windowToken, 0)
         } catch (e: Exception) {
             Log.e(TAG, "closeKeyboard: $e")
         }
