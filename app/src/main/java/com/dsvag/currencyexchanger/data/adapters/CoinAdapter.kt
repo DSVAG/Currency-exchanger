@@ -28,7 +28,7 @@ class CoinAdapter() : RecyclerView.Adapter<CoinAdapter.CoinViewHolder>() {
 
     override fun getItemCount(): Int = data.size
 
-    fun setData(data: ArrayList<Coin>) {
+    fun setData(data: List<Coin>) {
         this.data = data
         notifyDataSetChanged()
     }
