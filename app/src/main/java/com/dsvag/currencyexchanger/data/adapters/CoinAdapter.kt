@@ -15,8 +15,9 @@ class CoinAdapter() : RecyclerView.Adapter<CoinAdapter.CoinViewHolder>() {
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CoinViewHolder {
+        val inflater = LayoutInflater.from(parent.context)
         return CoinViewHolder(
-            LayoutInflater.from(parent.context).inflate(R.layout.row_coin, parent, false)
+            RowCoinBinding.inflate(inflater, parent, false)
         )
     }
 
