@@ -1,19 +1,16 @@
 package com.dsvag.currencyexchanger.data.adapters
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.dsvag.currencyexchanger.R
 import com.dsvag.currencyexchanger.data.models.latest.Coin
-import com.dsvag.currencyexchanger.data.untils.OnItemClickListener
 import com.dsvag.currencyexchanger.databinding.RowCoinBinding
 
 class CoinAdapter() : RecyclerView.Adapter<CoinAdapter.CoinViewHolder>() {
 
     private var data: MutableList<Coin> = ArrayList()
 
-    private var callback: OnItemClickListener? = null
+    private lateinit var recyclerView: RecyclerView
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CoinViewHolder {
         val inflater = LayoutInflater.from(parent.context)
@@ -26,15 +23,19 @@ class CoinAdapter() : RecyclerView.Adapter<CoinAdapter.CoinViewHolder>() {
     override fun onBindViewHolder(holder: CoinViewHolder, position: Int) {
         holder.bind(data[position])
 
-        if (callback != null) {
-            callback!!.onClick(position)
+        holder.itemView.setOnFocusChangeListener { view, hasFocus ->
+            if (hasFocus) {
+                moveToTop(position)
+            }
         }
     }
 
     override fun getItemCount(): Int = data.size
 
-    fun attachCallback(callback: OnItemClickListener) {
-        this.callback = callback
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        super.onAttachedToRecyclerView(recyclerView)
+
+        this.recyclerView = recyclerView
     }
 
     fun setData(data: List<Coin>) {
@@ -43,28 +44,32 @@ class CoinAdapter() : RecyclerView.Adapter<CoinAdapter.CoinViewHolder>() {
         notifyDataSetChanged()
     }
 
-    fun changeExpand(position: Int) {
-        data[position].changeExpand()
-        notifyItemChanged(position)
+    fun moveToTop(position: Int) {
+        data[0] = data.removeAt(    position)
+        notifyItemMoved(position, 0)
+        recyclerView.scrollToPosition(0)
     }
 
-    class CoinViewHolder(private val itemBinding: RowCoinBinding) :
+    inner class CoinViewHolder(private val itemBinding: RowCoinBinding) :
         RecyclerView.ViewHolder(itemBinding.root) {
 
         fun bind(coin: Coin) {
             itemBinding.name.text = coin.name
             itemBinding.symbol.text = coin.symbol
-            itemBinding.price.setText("${coin.quote.usd.price}")
-            itemBinding.volume24h.text = "${coin.quote.usd.volume24h}"
-            itemBinding.percentChange1h.text = "${coin.quote.usd.percentChange1h}"
-            itemBinding.percentChange24h.text = "${coin.quote.usd.percentChange24h}"
-            itemBinding.percentChange7d.text = "${coin.quote.usd.percentChange7d}"
-            itemBinding.lastUpdate.text = coin.quote.usd.lastUpdated
+            itemBinding.price.hint = coin.quote.usd.priceForOne.toString()
+            itemBinding.lastUpdate.text =
+                coin.quote.usd.lastUpdated.split("T")[1].replace(".000Z", "")
 
-            if (coin.isExpand) {
-                itemBinding.expand.visibility = View.VISIBLE
+            if (coin.quote.usd.priceForOne != coin.quote.usd.priceInAnotherCoin) {
+                itemBinding.price.text!!.clear()
             } else {
-                itemBinding.expand.visibility = View.GONE
+                itemBinding.price.setText(coin.quote.usd.priceInAnotherCoin.toString())
+            }
+
+            itemBinding.price.setOnFocusChangeListener { view, hasFocus ->
+                if (hasFocus) {
+                    moveToTop(adapterPosition)
+                }
             }
         }
     }

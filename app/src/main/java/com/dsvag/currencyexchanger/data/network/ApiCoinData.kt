@@ -15,7 +15,7 @@ private const val key = "59716081-0648-4054-8631-56ad6bc21c92"
 interface ApiCoinData {
     @GET("/v1/cryptocurrency/listings/latest")
     fun getCoins(
-        @Query("limit") limit: Int = 250
+        @Query("limit") limit: Int = 200
     ): Single<Latest>
 
     companion object {

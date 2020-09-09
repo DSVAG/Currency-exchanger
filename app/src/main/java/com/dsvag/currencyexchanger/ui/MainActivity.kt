@@ -1,6 +1,5 @@
 package com.dsvag.currencyexchanger.ui
 
-import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.inputmethod.InputMethodManager
@@ -9,14 +8,8 @@ import androidx.core.content.getSystemService
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.dsvag.currencyexchanger.data.adapters.CoinAdapter
-import com.dsvag.currencyexchanger.data.models.latest.Coin
-import com.dsvag.currencyexchanger.data.models.latest.Latest
-import com.dsvag.currencyexchanger.data.network.ApiCoinData
-import com.dsvag.currencyexchanger.data.until.OnItemClickListener
+import com.dsvag.currencyexchanger.data.repositorys.CoinRepository
 import com.dsvag.currencyexchanger.databinding.ActivityMainBinding
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.core.Single
-import io.reactivex.rxjava3.schedulers.Schedulers
 
 class MainActivity : AppCompatActivity() {
 
@@ -29,14 +22,23 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         initRecyclerview()
-        initAdapter()
 
         apiCall()
     }
 
+    private fun apiCall() {
+        CoinRepository().getCoins().subscribe({
+            adapter.setData(it.coins)
+        }, {
+            Log.e(TAG, "onError", it)
+        })
+    }
+
     private fun initRecyclerview() {
-        binding.recyclerview.setHasFixedSize(false)
+        binding.recyclerview.setHasFixedSize(true)
         binding.recyclerview.layoutManager = LinearLayoutManager(binding.recyclerview.context)
+
+        adapter.onAttachedToRecyclerView(binding.recyclerview)
         binding.recyclerview.adapter = adapter
 
         binding.recyclerview.addOnScrollListener(object : RecyclerView.OnScrollListener() {
@@ -49,33 +51,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         })
-    }
-
-    private fun initAdapter() {
-        adapter.attachCallback {
-            //adapter.changeExpand(it)
-        }
-    }
-
-    private fun apiCall() {
-        getSingle().subscribe(
-            {
-                adapter.setData(it.coins as ArrayList<Coin>)
-                Log.e(TAG, "${it.status.errorCode}")
-            },
-            {
-                Log.e(TAG, "onError", it)
-            }
-        )
-    }
-
-    private fun getSingle(): Single<Latest> {
-        return ApiCoinData
-            .invoke()
-            .create(ApiCoinData::class.java)
-            .getCoins(200)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
     }
 
     private fun hideKeyboard() {

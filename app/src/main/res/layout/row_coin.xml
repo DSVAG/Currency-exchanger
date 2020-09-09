@@ -34,68 +34,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="end"
+        android:imeOptions="actionDone"
         android:inputType="numberDecimal"
-        android:text="20.0"
         android:textColor="@color/black"
+        android:textColorHint="@color/grey"
         android:textSize="20sp"
         app:layout_constraintBottom_toBottomOf="@+id/symbol"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <LinearLayout
-        android:id="@+id/expand"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="4dp"
-        android:background="@color/white"
-        android:orientation="vertical"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/symbol"
-        tools:visibility="visible">
-
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/volume24h"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="start"
-            android:textColor="@color/grey"
-            android:textSize="15sp"
-            tools:text="volume 24h: 7155680000" />
-
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/percentChange1h"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:gravity="start"
-            android:textColor="@color/grey"
-            android:textSize="15sp"
-            tools:text="change 1h: -0.152774" />
-
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/percentChange24h"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:gravity="start"
-            android:textColor="@color/grey"
-            android:textSize="15sp"
-            tools:text="change 24h: 0.518894" />
-
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/percentChange7d"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:gravity="start"
-            android:textColor="@color/grey"
-            android:textSize="15sp"
-            tools:text="change 7d: 0.986573" />
-
-    </LinearLayout>
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/lastUpdate"
@@ -105,7 +51,7 @@
         android:textSize="15sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/expand"
+        app:layout_constraintTop_toBottomOf="@+id/symbol"
         tools:text="22:53:32" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
