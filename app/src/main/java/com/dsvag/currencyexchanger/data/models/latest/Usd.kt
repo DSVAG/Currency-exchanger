@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName
 
 data class Usd(
     @SerializedName("price")
-    val priceForOne: Double,
+    val price: Double,
 
     @SerializedName("volume_24h")
     val volume24h: Double,
@@ -24,5 +24,5 @@ data class Usd(
     @SerializedName("last_updated")
     val lastUpdated: String,
 
-    var priceInAnotherCoin: Double = priceForOne
+    var priceInAnotherCoin: Double = 0.0,
 )

@@ -49,6 +49,6 @@ data class Coin(
     val quote: Quote,
 ) {
     fun reprice(usd: Double) {
-        quote.usd.priceInAnotherCoin = usd / quote.usd.priceForOne
+        quote.usd.priceInAnotherCoin = usd / quote.usd.price
     }
 }
