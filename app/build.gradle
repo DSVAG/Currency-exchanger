@@ -55,6 +55,7 @@ dependencies {
     //RxJava
     implementation "io.reactivex.rxjava3:rxjava:3.0.6"
     implementation "io.reactivex.rxjava3:rxandroid:3.0.0"
+    implementation "com.jakewharton.rxbinding4:rxbinding:4.0.0"
 
     //Retrofit
     def retrofitVersion = '2.9.0'
@@ -63,9 +64,9 @@ dependencies {
     implementation "com.squareup.retrofit2:adapter-rxjava3:$retrofitVersion"
 
     //Room
-    def room_version = "2.3.0-alpha02"
-    implementation "androidx.room:room-runtime:$room_version"
-    implementation "androidx.room:room-ktx:$room_version"
-    implementation "androidx.room:room-rxjava3:$room_version"
-    kapt "androidx.room:room-compiler:$room_version"
+    def roomVersion = "2.3.0-alpha02"
+    implementation "androidx.room:room-runtime:$roomVersion"
+    implementation "androidx.room:room-ktx:$roomVersion"
+    implementation "androidx.room:room-rxjava3:$roomVersion"
+    kapt "androidx.room:room-compiler:$roomVersion"
 }

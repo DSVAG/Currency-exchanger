@@ -7,7 +7,7 @@ import androidx.room.Query
 import com.dsvag.currencyexchanger.data.models.latest.Coin
 
 @Dao
-interface CoinDAO {
+interface CoinDao {
     @Insert
     fun insertAll(vararg coin: Coin)
 
