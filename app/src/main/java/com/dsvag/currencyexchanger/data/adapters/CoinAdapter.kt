@@ -6,8 +6,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.dsvag.currencyexchanger.data.models.latest.Coin
 import com.dsvag.currencyexchanger.databinding.RowCoinBinding
 import com.jakewharton.rxbinding4.widget.textChanges
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.schedulers.Schedulers
 import java.util.concurrent.TimeUnit
 
 class CoinAdapter : RecyclerView.Adapter<CoinAdapter.CoinViewHolder>() {
@@ -21,21 +19,8 @@ class CoinAdapter : RecyclerView.Adapter<CoinAdapter.CoinViewHolder>() {
 
         return CoinViewHolder(
             RowCoinBinding.inflate(inflater, parent, false),
-            moveToTop = {
-                data.add(0, data.removeAt(it))
-                notifyItemMoved(it, 0)
-                recyclerView.scrollToPosition(0)
-            },
-            {
-                data[0].quote.usd.priceInAnotherCoin = it
-
-                data.forEachIndexed { index, coin ->
-                    if (index != 0) {
-                        coin.reprice(data[0].quote.usd.price * it)
-                        notifyItemChanged(index)
-                    }
-                }
-            }
+            ::moveToTop,
+            ::reprice
         )
     }
 
@@ -55,6 +40,23 @@ class CoinAdapter : RecyclerView.Adapter<CoinAdapter.CoinViewHolder>() {
         this.data.clear()
         this.data.addAll(data)
         notifyDataSetChanged()
+    }
+
+    private fun moveToTop(position: Int) {
+        data.add(0, data.removeAt(position))
+        notifyItemMoved(position, 0)
+        recyclerView.scrollToPosition(0)
+    }
+
+    private fun reprice(usd: Double) {
+        data[0].quote.usd.priceInAnotherCoin = usd
+
+        data.forEachIndexed { index, coin ->
+            if (index != 0) {
+                coin.reprice(data[0].quote.usd.price * usd)
+                notifyItemChanged(index)
+            }
+        }
     }
 
     class CoinViewHolder(
@@ -83,10 +85,8 @@ class CoinAdapter : RecyclerView.Adapter<CoinAdapter.CoinViewHolder>() {
                     moveToTop(adapterPosition)
 
                     itemBinding.price.textChanges()
-                        .subscribeOn(Schedulers.computation())
-                        .observeOn(AndroidSchedulers.mainThread())
                         .debounce(300, TimeUnit.MILLISECONDS)
-                        .subscribe({ reprice("0".plus(it).toDouble()) }, {}, {})
+                        .subscribe({ reprice(it.toString().toDoubleOrNull() ?: 0.0) }, {}, {})
                 }
             }
         }
