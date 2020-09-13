@@ -16,5 +16,5 @@ data class Platform(
     val slug: String,
 
     @SerializedName("token_address")
-    val tokenAddress: String
+    val tokenAddress: String,
 )

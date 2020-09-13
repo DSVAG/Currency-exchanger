@@ -8,18 +8,22 @@ import androidx.core.content.getSystemService
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.dsvag.currencyexchanger.data.adapters.CoinAdapter
-import com.dsvag.currencyexchanger.data.models.latest.Coin
-import com.dsvag.currencyexchanger.data.repositorys.CoinRepository
+import com.dsvag.currencyexchanger.data.utils.getAppComponent
 import com.dsvag.currencyexchanger.databinding.ActivityMainBinding
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.addTo
 
 class MainActivity : AppCompatActivity() {
 
     private val binding
             by lazy(LazyThreadSafetyMode.NONE) { ActivityMainBinding.inflate(layoutInflater) }
 
-    private val repository by lazy { CoinRepository(application) }
+    private val repository by lazy { getAppComponent().coinRepository }
 
     private val adapter = CoinAdapter()
+
+    private val disposable = CompositeDisposable()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,37 +33,20 @@ class MainActivity : AppCompatActivity() {
         apiCall()
     }
 
-    private fun apiCall() {
-        val isDbEmpty = readFormDb().isEmpty()
-        val data: MutableList<Coin> = ArrayList()
-
-        repository.getCoins().subscribe({
-            if (it.status.errorCode == 0) {
-                data.addAll(it.coins)
-            }
-        }, {
-            Log.e(TAG, "Error on api call", it)
-        })
-
-        if (isDbEmpty) {
-            repository.addCoins(data)
-        } else {
-            repository.updateCoins(data)
-        }
-
-        adapter.setData(readFormDb())
+    override fun onDestroy() {
+        super.onDestroy()
+        disposable.dispose()
     }
 
-    private fun readFormDb(): List<Coin> {
-        val list: MutableList<Coin> = ArrayList()
+    private fun apiCall() {
+        repository.getCoins()
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+                adapter.setData(it)
+            }, {
 
-        repository.readCoins()?.subscribe({
-            list.addAll(it)
-        }, {
-            Log.e(TAG, "Error on read DB", it)
-        })
-
-        return list
+            })
+            .addTo(disposable)
     }
 
     private fun initRecyclerview() {

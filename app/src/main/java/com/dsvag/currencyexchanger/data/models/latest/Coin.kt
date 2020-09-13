@@ -6,7 +6,7 @@ import androidx.room.TypeConverters
 import com.dsvag.currencyexchanger.data.utils.Converters
 import com.google.gson.annotations.SerializedName
 
-@Entity(tableName = "coin_data")
+@Entity(tableName = "coin")
 data class Coin(
     @SerializedName("id")
     @PrimaryKey val id: Long,
