@@ -1,19 +1,20 @@
 package com.dsvag.currencyexchanger.data.database
 
-import androidx.room.Dao
-import androidx.room.Delete
-import androidx.room.Insert
-import androidx.room.Query
+import androidx.room.*
 import com.dsvag.currencyexchanger.data.models.latest.Coin
+import io.reactivex.rxjava3.core.Single
 
 @Dao
 interface CoinDao {
     @Insert
-    fun insertAll(vararg coin: Coin)
+    fun insertAll(coins: List<Coin>)
+
+    @Update
+    fun updateAll(coins: List<Coin>)
 
     @Delete
-    fun deleteAll(vararg coin: Coin)
+    fun deleteAll(coins: List<Coin>)
 
-    @Query("SELECT * FROM Coin")
-    fun getCoins(): List<Coin>
+    @Query("SELECT * FROM coin_data")
+    fun getCoins(): Single<List<Coin>>
 }

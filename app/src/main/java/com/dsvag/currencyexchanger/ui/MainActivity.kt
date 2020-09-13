@@ -8,6 +8,7 @@ import androidx.core.content.getSystemService
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.dsvag.currencyexchanger.data.adapters.CoinAdapter
+import com.dsvag.currencyexchanger.data.models.latest.Coin
 import com.dsvag.currencyexchanger.data.repositorys.CoinRepository
 import com.dsvag.currencyexchanger.databinding.ActivityMainBinding
 
@@ -15,6 +16,8 @@ class MainActivity : AppCompatActivity() {
 
     private val binding
             by lazy(LazyThreadSafetyMode.NONE) { ActivityMainBinding.inflate(layoutInflater) }
+
+    private val repository by lazy { CoinRepository(application) }
 
     private val adapter = CoinAdapter()
 
@@ -27,11 +30,36 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun apiCall() {
-        CoinRepository().getCoins().subscribe({
-            adapter.setData(it.coins)
+        val isDbEmpty = readFormDb().isEmpty()
+        val data: MutableList<Coin> = ArrayList()
+
+        repository.getCoins().subscribe({
+            if (it.status.errorCode == 0) {
+                data.addAll(it.coins)
+            }
         }, {
-            Log.e(TAG, "onError", it)
+            Log.e(TAG, "Error on api call", it)
         })
+
+        if (isDbEmpty) {
+            repository.addCoins(data)
+        } else {
+            repository.updateCoins(data)
+        }
+
+        adapter.setData(readFormDb())
+    }
+
+    private fun readFormDb(): List<Coin> {
+        val list: MutableList<Coin> = ArrayList()
+
+        repository.readCoins()?.subscribe({
+            list.addAll(it)
+        }, {
+            Log.e(TAG, "Error on read DB", it)
+        })
+
+        return list
     }
 
     private fun initRecyclerview() {
