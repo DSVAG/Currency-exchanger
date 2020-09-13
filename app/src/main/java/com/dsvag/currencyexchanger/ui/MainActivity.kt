@@ -8,15 +8,22 @@ import androidx.core.content.getSystemService
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.dsvag.currencyexchanger.data.adapters.CoinAdapter
-import com.dsvag.currencyexchanger.data.repositorys.CoinRepository
+import com.dsvag.currencyexchanger.data.utils.getAppComponent
 import com.dsvag.currencyexchanger.databinding.ActivityMainBinding
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.addTo
 
 class MainActivity : AppCompatActivity() {
 
     private val binding
             by lazy(LazyThreadSafetyMode.NONE) { ActivityMainBinding.inflate(layoutInflater) }
 
+    private val repository by lazy { getAppComponent().coinRepository }
+
     private val adapter = CoinAdapter()
+
+    private val disposable = CompositeDisposable()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,12 +33,20 @@ class MainActivity : AppCompatActivity() {
         apiCall()
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        disposable.dispose()
+    }
+
     private fun apiCall() {
-        CoinRepository().getCoins().subscribe({
-            adapter.setData(it.coins)
-        }, {
-            Log.e(TAG, "onError", it)
-        })
+        repository.getCoins()
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+                adapter.setData(it)
+            }, {
+
+            })
+            .addTo(disposable)
     }
 
     private fun initRecyclerview() {

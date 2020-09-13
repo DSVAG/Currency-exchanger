@@ -3,17 +3,20 @@ package com.dsvag.currencyexchanger.data.database
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.dsvag.currencyexchanger.data.models.latest.Coin
+import io.reactivex.rxjava3.core.Completable
+import io.reactivex.rxjava3.core.Single
 
 @Dao
 interface CoinDao {
-    @Insert
-    fun insertAll(vararg coin: Coin)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertAll(coins: List<Coin>): Completable
 
     @Delete
-    fun deleteAll(vararg coin: Coin)
+    fun deleteAll(coins: List<Coin>): Completable
 
-    @Query("SELECT * FROM Coin")
-    fun getCoins(): List<Coin>
+    @Query("SELECT * FROM coin")
+    fun getCoins(): Single<List<Coin>>
 }

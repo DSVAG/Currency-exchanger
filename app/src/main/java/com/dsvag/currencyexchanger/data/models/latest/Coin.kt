@@ -2,12 +2,14 @@ package com.dsvag.currencyexchanger.data.models.latest
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import androidx.room.TypeConverters
+import com.dsvag.currencyexchanger.data.utils.Converters
 import com.google.gson.annotations.SerializedName
 
-@Entity
+@Entity(tableName = "coin")
 data class Coin(
     @SerializedName("id")
-    @PrimaryKey val id: Int,
+    @PrimaryKey val id: Long,
 
     @SerializedName("name")
     val name: String,
@@ -24,6 +26,7 @@ data class Coin(
     @SerializedName("date_added")
     val dateAdded: String,
 
+    @TypeConverters(Converters::class)
     @SerializedName("tags")
     val tags: List<String>,
 
@@ -36,8 +39,9 @@ data class Coin(
     @SerializedName("total_supply")
     val totalSupply: Double,
 
+    @TypeConverters(Converters::class)
     @SerializedName("platform")
-    val platform: Any,
+    val platform: Platform?,
 
     @SerializedName("cmc_rank")
     val cmcRank: Int,
@@ -45,6 +49,7 @@ data class Coin(
     @SerializedName("last_updated")
     val lastUpdated: String,
 
+    @TypeConverters(Converters::class)
     @SerializedName("quote")
     val quote: Quote,
 ) {
