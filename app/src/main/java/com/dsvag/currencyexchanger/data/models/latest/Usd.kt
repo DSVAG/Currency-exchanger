@@ -1,7 +1,6 @@
 package com.dsvag.currencyexchanger.data.models.latest
 
 import com.google.gson.annotations.SerializedName
-import java.io.Serializable
 
 data class Usd(
     @SerializedName("price")
@@ -26,4 +25,4 @@ data class Usd(
     val lastUpdated: String,
 
     var priceInAnotherCoin: Double = 0.0,
-) : Serializable
+)
