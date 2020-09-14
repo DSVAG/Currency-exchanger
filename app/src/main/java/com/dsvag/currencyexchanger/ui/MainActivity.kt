@@ -44,11 +44,7 @@ class MainActivity : AppCompatActivity() {
     private fun apiCall() {
         repository.getCoins()
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({
-                adapter.setData(it)
-            }, {
-
-            })
+            .subscribe({ adapter.setData(it) }, { })
             .addTo(disposable)
     }
 
