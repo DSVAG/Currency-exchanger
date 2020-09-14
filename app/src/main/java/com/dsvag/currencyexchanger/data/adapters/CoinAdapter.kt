@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.dsvag.currencyexchanger.data.models.latest.Coin
+import com.dsvag.currencyexchanger.data.utils.KeyBoardUtils
 import com.dsvag.currencyexchanger.databinding.RowCoinBinding
 import com.jakewharton.rxbinding4.widget.textChanges
 import java.util.concurrent.TimeUnit
@@ -11,6 +12,7 @@ import java.util.concurrent.TimeUnit
 class CoinAdapter : RecyclerView.Adapter<CoinAdapter.CoinViewHolder>() {
 
     private var data: MutableList<Coin> = ArrayList()
+    private var filterData: MutableList<Coin> = ArrayList()
 
     private lateinit var recyclerView: RecyclerView
 
@@ -25,10 +27,10 @@ class CoinAdapter : RecyclerView.Adapter<CoinAdapter.CoinViewHolder>() {
     }
 
     override fun onBindViewHolder(holder: CoinViewHolder, position: Int) {
-        holder.bind(data[position])
+        holder.bind(filterData[position])
     }
 
-    override fun getItemCount(): Int = data.size
+    override fun getItemCount(): Int = filterData.size
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
@@ -38,22 +40,42 @@ class CoinAdapter : RecyclerView.Adapter<CoinAdapter.CoinViewHolder>() {
 
     fun setData(data: List<Coin>) {
         this.data.clear()
+        this.filterData.clear()
+
         this.data.addAll(data)
+        this.filterData.addAll(data)
+
         notifyDataSetChanged()
     }
 
+    fun filterOut(string: String) {
+        filterData.clear()
+        notifyDataSetChanged()
+        if (string.isNotEmpty()) {
+            data.forEach { coin ->
+                if (coin.slug.toLowerCase().contains(string) || coin.symbol.toLowerCase().contains(string)) {
+                    filterData.add(coin)
+                    notifyItemInserted(filterData.size - 1)
+                }
+            }
+        } else {
+            filterData.addAll(data)
+            notifyDataSetChanged()
+        }
+    }
+
     private fun moveToTop(position: Int) {
-        data.add(0, data.removeAt(position))
+        filterData.add(0, filterData.removeAt(position))
         notifyItemMoved(position, 0)
         recyclerView.scrollToPosition(0)
     }
 
     private fun reprice(usd: Double) {
-        data[0].quote.usd.priceInAnotherCoin = usd
+        filterData.first().quote.usd.priceInAnotherCoin = usd
 
-        data.forEachIndexed { index, coin ->
+        filterData.forEachIndexed { index, coin ->
             if (index != 0) {
-                coin.reprice(data[0].quote.usd.price * usd)
+                coin.reprice(filterData.first().quote.usd.price * usd)
                 notifyItemChanged(index)
             }
         }
@@ -82,9 +104,10 @@ class CoinAdapter : RecyclerView.Adapter<CoinAdapter.CoinViewHolder>() {
                 itemBinding.price.requestFocus()
             }
 
-            itemBinding.price.setOnFocusChangeListener { _, hasFocus ->
+            itemBinding.price.setOnFocusChangeListener { view, hasFocus ->
                 if (hasFocus) {
                     itemBinding.price.text?.clear()
+                    KeyBoardUtils(itemBinding.root.context).showKeyBoard(view)
 
                     moveToTop(adapterPosition)
 

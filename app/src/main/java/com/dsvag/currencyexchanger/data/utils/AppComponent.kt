@@ -65,5 +65,7 @@ class AppComponent(application: Application) {
         retrofit.create(ApiCoinData::class.java)
     }
 
+    val keyBoardUtils by lazy { KeyBoardUtils(application) }
+
     val coinRepository by lazy { CoinRepository(coinDao, apiCoinData) }
 }

@@ -25,37 +25,32 @@
             android:fitsSystemWindows="true"
             app:layout_scrollFlags="scroll|enterAlways">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/searchBar"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@color/transparent"
-                android:padding="2dp">
-
-                <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                    android:id="@+id/searchBar"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@drawable/bg_searchbar"
-                    android:gravity="center_vertical"
-                    android:hint="Search"
-                    android:inputType="textShortMessage"
-                    android:maxLines="1"
-                    android:textColor="@color/greyDark"
-                    android:textColorHint="@color/greyLight"
-                    android:textSize="20sp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_searchbar"
+                android:gravity="center_vertical"
+                android:hint="Search"
+                android:inputType="textShortMessage"
+                android:maxLines="1"
+                android:textColor="@color/greyDark"
+                android:textColorHint="@color/greyLight"
+                android:textSize="20sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <include
-        android:id="@+id/coinRv"
-        layout="@layout/coin_list_layout" />
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="2dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
