@@ -78,6 +78,10 @@ class CoinAdapter : RecyclerView.Adapter<CoinAdapter.CoinViewHolder>() {
                 itemBinding.price.text?.clear()
             }
 
+            itemBinding.root.setOnClickListener {
+                itemBinding.price.requestFocus()
+            }
+
             itemBinding.price.setOnFocusChangeListener { _, hasFocus ->
                 if (hasFocus) {
                     itemBinding.price.text?.clear()

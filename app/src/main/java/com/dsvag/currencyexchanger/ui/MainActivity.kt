@@ -50,13 +50,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initRecyclerview() {
-        binding.mainContent.recyclerview.setHasFixedSize(true)
-        binding.mainContent.recyclerview.layoutManager = LinearLayoutManager(binding.mainContent.recyclerview.context)
+        binding.coinRv.recyclerview.setHasFixedSize(true)
+        binding.coinRv.recyclerview.layoutManager = LinearLayoutManager(binding.coinRv.recyclerview.context)
 
-        adapter.onAttachedToRecyclerView(binding.mainContent.recyclerview)
-        binding.mainContent.recyclerview.adapter = adapter
+        adapter.onAttachedToRecyclerView(binding.coinRv.recyclerview)
+        binding.coinRv.recyclerview.adapter = adapter
 
-        binding.mainContent.recyclerview.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+        binding.coinRv.recyclerview.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 when (newState) {
