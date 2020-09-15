@@ -2,11 +2,15 @@ package com.dsvag.currencyexchanger.data.adapters
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.dsvag.currencyexchanger.data.models.latest.Coin
 import com.dsvag.currencyexchanger.data.utils.KeyBoardUtils
 import com.dsvag.currencyexchanger.databinding.RowCoinBinding
 import com.jakewharton.rxbinding4.widget.textChanges
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.addTo
 import java.util.concurrent.TimeUnit
 
 class CoinAdapter : RecyclerView.Adapter<CoinAdapter.CoinViewHolder>() {
@@ -50,18 +54,18 @@ class CoinAdapter : RecyclerView.Adapter<CoinAdapter.CoinViewHolder>() {
 
     fun filterOut(string: String) {
         filterData.clear()
-        notifyDataSetChanged()
+
         if (string.isNotEmpty()) {
             data.forEach { coin ->
                 if (coin.slug.toLowerCase().contains(string) || coin.symbol.toLowerCase().contains(string)) {
                     filterData.add(coin)
-                    notifyItemInserted(filterData.size - 1)
                 }
             }
         } else {
             filterData.addAll(data)
-            notifyDataSetChanged()
         }
+
+        notifyDataSetChanged()
     }
 
     private fun moveToTop(position: Int) {
@@ -71,11 +75,12 @@ class CoinAdapter : RecyclerView.Adapter<CoinAdapter.CoinViewHolder>() {
     }
 
     private fun reprice(usd: Double) {
-        filterData.first().quote.usd.priceInAnotherCoin = usd
+        val firstPrice = filterData.first().quote.usd.price
+        filterData.first().reprice(usd)
 
         filterData.forEachIndexed { index, coin ->
             if (index != 0) {
-                coin.reprice(filterData.first().quote.usd.price * usd)
+                coin.reprice(firstPrice * usd)
                 notifyItemChanged(index)
             }
         }
@@ -86,6 +91,8 @@ class CoinAdapter : RecyclerView.Adapter<CoinAdapter.CoinViewHolder>() {
         private val moveToTop: (position: Int) -> Unit,
         private val reprice: (price: Double) -> Unit,
     ) : RecyclerView.ViewHolder(itemBinding.root) {
+
+        private var disposable = CompositeDisposable()
 
         fun bind(coin: Coin) {
             itemBinding.name.text = coin.name
@@ -107,13 +114,19 @@ class CoinAdapter : RecyclerView.Adapter<CoinAdapter.CoinViewHolder>() {
             itemBinding.price.setOnFocusChangeListener { view, hasFocus ->
                 if (hasFocus) {
                     itemBinding.price.text?.clear()
-                    KeyBoardUtils(itemBinding.root.context).showKeyBoard(view)
+                    KeyBoardUtils(
+                        ContextCompat.getSystemService(itemBinding.root.context, InputMethodManager::class.java)!!)
+                        .showKeyBoard(view)
 
                     moveToTop(adapterPosition)
 
                     itemBinding.price.textChanges()
                         .debounce(300, TimeUnit.MILLISECONDS)
                         .subscribe({ reprice(it.toString().toDoubleOrNull() ?: 0.0) }, {}, {})
+                        .addTo(disposable)
+
+                } else {
+                    disposable.dispose()
                 }
             }
         }

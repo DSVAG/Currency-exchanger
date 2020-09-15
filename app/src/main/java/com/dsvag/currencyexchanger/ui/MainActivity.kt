@@ -53,6 +53,7 @@ class MainActivity : AppCompatActivity() {
             .debounce(300, TimeUnit.MILLISECONDS)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({ adapter.filterOut(it.toString().toLowerCase()) }, {}, {})
+            .addTo(disposable)
     }
 
     private fun initRecyclerview() {
@@ -67,7 +68,7 @@ class MainActivity : AppCompatActivity() {
                 super.onScrollStateChanged(recyclerView, newState)
                 when (newState) {
                     RecyclerView.SCROLL_STATE_DRAGGING -> {
-                        keyBoardUtils.hideKeyBoard(currentFocus)
+                        keyBoardUtils.hideKeyBoard(binding.root)
                     }
                 }
             }
