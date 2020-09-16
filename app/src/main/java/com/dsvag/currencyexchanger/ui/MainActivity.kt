@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity() {
 
     private val keyBoardUtils by lazy { getAppComponent().keyBoardUtils }
 
-    private val adapter = CoinAdapter()
+    private val adapter = CoinAdapter(keyBoardUtils)
 
     private val disposable = CompositeDisposable()
 
@@ -50,8 +50,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun initSearchBar() {
         binding.searchBar.textChanges()
-            .debounce(300, TimeUnit.MILLISECONDS)
-            .observeOn(AndroidSchedulers.mainThread())
+            .debounce(300, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
             .subscribe({ adapter.filterOut(it.toString().toLowerCase()) }, {}, {})
             .addTo(disposable)
     }

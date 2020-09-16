@@ -2,18 +2,17 @@ package com.dsvag.currencyexchanger.data.adapters
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.view.inputmethod.InputMethodManager
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.dsvag.currencyexchanger.data.models.latest.Coin
 import com.dsvag.currencyexchanger.data.utils.KeyBoardUtils
 import com.dsvag.currencyexchanger.databinding.RowCoinBinding
 import com.jakewharton.rxbinding4.widget.textChanges
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import java.util.concurrent.TimeUnit
 
-class CoinAdapter : RecyclerView.Adapter<CoinAdapter.CoinViewHolder>() {
+class CoinAdapter(private val keyBoardUtils: KeyBoardUtils) : RecyclerView.Adapter<CoinAdapter.CoinViewHolder>() {
 
     private var data: MutableList<Coin> = ArrayList()
     private var filterData: MutableList<Coin> = ArrayList()
@@ -26,7 +25,8 @@ class CoinAdapter : RecyclerView.Adapter<CoinAdapter.CoinViewHolder>() {
         return CoinViewHolder(
             RowCoinBinding.inflate(inflater, parent, false),
             ::moveToTop,
-            ::reprice
+            ::reprice,
+            keyBoardUtils,
         )
     }
 
@@ -90,6 +90,7 @@ class CoinAdapter : RecyclerView.Adapter<CoinAdapter.CoinViewHolder>() {
         private val itemBinding: RowCoinBinding,
         private val moveToTop: (position: Int) -> Unit,
         private val reprice: (price: Double) -> Unit,
+        private val keyBoardUtils: KeyBoardUtils,
     ) : RecyclerView.ViewHolder(itemBinding.root) {
 
         private var disposable = CompositeDisposable()
@@ -114,14 +115,12 @@ class CoinAdapter : RecyclerView.Adapter<CoinAdapter.CoinViewHolder>() {
             itemBinding.price.setOnFocusChangeListener { view, hasFocus ->
                 if (hasFocus) {
                     itemBinding.price.text?.clear()
-                    KeyBoardUtils(
-                        ContextCompat.getSystemService(itemBinding.root.context, InputMethodManager::class.java)!!)
-                        .showKeyBoard(view)
+                    keyBoardUtils.showKeyBoard(view)
 
                     moveToTop(adapterPosition)
 
                     itemBinding.price.textChanges()
-                        .debounce(300, TimeUnit.MILLISECONDS)
+                        .debounce(300, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
                         .subscribe({ reprice(it.toString().toDoubleOrNull() ?: 0.0) }, {}, {})
                         .addTo(disposable)
 

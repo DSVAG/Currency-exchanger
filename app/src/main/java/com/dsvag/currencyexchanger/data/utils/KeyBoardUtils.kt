@@ -11,7 +11,7 @@ class KeyBoardUtils(private val inputMethodManager: InputMethodManager) {
         try {
             inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
         } catch (e: Exception) {
-            Log.e(TAG, "closeKeyboard: $e")
+            Log.e(TAG, "hideKeyboard: $e")
         }
     }
 
@@ -19,7 +19,7 @@ class KeyBoardUtils(private val inputMethodManager: InputMethodManager) {
         try {
             inputMethodManager.showSoftInput(view, 0)
         } catch (e: Exception) {
-            Log.e(TAG, "closeKeyboard: $e")
+            Log.e(TAG, "showKeyboard: $e")
         }
     }
 }
