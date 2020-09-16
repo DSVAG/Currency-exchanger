@@ -4,13 +4,18 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.dsvag.currencyexchanger.data.models.latest.Coin
+import com.dsvag.currencyexchanger.data.utils.KeyBoardUtils
 import com.dsvag.currencyexchanger.databinding.RowCoinBinding
 import com.jakewharton.rxbinding4.widget.textChanges
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.addTo
 import java.util.concurrent.TimeUnit
 
-class CoinAdapter : RecyclerView.Adapter<CoinAdapter.CoinViewHolder>() {
+class CoinAdapter(private val keyBoardUtils: KeyBoardUtils) : RecyclerView.Adapter<CoinAdapter.CoinViewHolder>() {
 
     private var data: MutableList<Coin> = ArrayList()
+    private var filterData: MutableList<Coin> = ArrayList()
 
     private lateinit var recyclerView: RecyclerView
 
@@ -20,15 +25,16 @@ class CoinAdapter : RecyclerView.Adapter<CoinAdapter.CoinViewHolder>() {
         return CoinViewHolder(
             RowCoinBinding.inflate(inflater, parent, false),
             ::moveToTop,
-            ::reprice
+            ::reprice,
+            keyBoardUtils,
         )
     }
 
     override fun onBindViewHolder(holder: CoinViewHolder, position: Int) {
-        holder.bind(data[position])
+        holder.bind(filterData[position])
     }
 
-    override fun getItemCount(): Int = data.size
+    override fun getItemCount(): Int = filterData.size
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
@@ -38,22 +44,43 @@ class CoinAdapter : RecyclerView.Adapter<CoinAdapter.CoinViewHolder>() {
 
     fun setData(data: List<Coin>) {
         this.data.clear()
+        this.filterData.clear()
+
         this.data.addAll(data)
+        this.filterData.addAll(data)
+
+        notifyDataSetChanged()
+    }
+
+    fun filterOut(string: String) {
+        filterData.clear()
+
+        if (string.isNotEmpty()) {
+            data.forEach { coin ->
+                if (coin.slug.toLowerCase().contains(string) || coin.symbol.toLowerCase().contains(string)) {
+                    filterData.add(coin)
+                }
+            }
+        } else {
+            filterData.addAll(data)
+        }
+
         notifyDataSetChanged()
     }
 
     private fun moveToTop(position: Int) {
-        data.add(0, data.removeAt(position))
+        filterData.add(0, filterData.removeAt(position))
         notifyItemMoved(position, 0)
         recyclerView.scrollToPosition(0)
     }
 
     private fun reprice(usd: Double) {
-        data[0].quote.usd.priceInAnotherCoin = usd
+        val firstPrice = filterData.first().quote.usd.price
+        filterData.first().reprice(usd)
 
-        data.forEachIndexed { index, coin ->
+        filterData.forEachIndexed { index, coin ->
             if (index != 0) {
-                coin.reprice(data[0].quote.usd.price * usd)
+                coin.reprice(firstPrice * usd)
                 notifyItemChanged(index)
             }
         }
@@ -63,7 +90,10 @@ class CoinAdapter : RecyclerView.Adapter<CoinAdapter.CoinViewHolder>() {
         private val itemBinding: RowCoinBinding,
         private val moveToTop: (position: Int) -> Unit,
         private val reprice: (price: Double) -> Unit,
+        private val keyBoardUtils: KeyBoardUtils,
     ) : RecyclerView.ViewHolder(itemBinding.root) {
+
+        private var disposable = CompositeDisposable()
 
         fun bind(coin: Coin) {
             itemBinding.name.text = coin.name
@@ -78,15 +108,24 @@ class CoinAdapter : RecyclerView.Adapter<CoinAdapter.CoinViewHolder>() {
                 itemBinding.price.text?.clear()
             }
 
-            itemBinding.price.setOnFocusChangeListener { _, hasFocus ->
+            itemBinding.root.setOnClickListener {
+                itemBinding.price.requestFocus()
+            }
+
+            itemBinding.price.setOnFocusChangeListener { view, hasFocus ->
                 if (hasFocus) {
                     itemBinding.price.text?.clear()
+                    keyBoardUtils.showKeyBoard(view)
 
                     moveToTop(adapterPosition)
 
                     itemBinding.price.textChanges()
-                        .debounce(300, TimeUnit.MILLISECONDS)
+                        .debounce(300, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
                         .subscribe({ reprice(it.toString().toDoubleOrNull() ?: 0.0) }, {}, {})
+                        .addTo(disposable)
+
+                } else {
+                    disposable.dispose()
                 }
             }
         }

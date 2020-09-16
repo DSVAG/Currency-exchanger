@@ -6,4 +6,6 @@
         <item name="colorAccent">@color/aqua</item>
     </style>
 
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar" />
+
 </resources>

@@ -1,6 +1,8 @@
 package com.dsvag.currencyexchanger.data.utils
 
 import android.app.Application
+import android.view.inputmethod.InputMethodManager
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.room.Room
 import com.dsvag.currencyexchanger.data.database.CoinDao
 import com.dsvag.currencyexchanger.data.database.CoinDatabase
@@ -64,6 +66,9 @@ class AppComponent(application: Application) {
     private val apiCoinData: ApiCoinData by lazy {
         retrofit.create(ApiCoinData::class.java)
     }
+
+    val keyBoardUtils
+            by lazy { KeyBoardUtils(getSystemService(application, InputMethodManager::class.java)!!) }
 
     val coinRepository by lazy { CoinRepository(coinDao, apiCoinData) }
 }

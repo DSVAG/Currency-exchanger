@@ -1,18 +1,17 @@
 package com.dsvag.currencyexchanger.ui
 
 import android.os.Bundle
-import android.util.Log
-import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.getSystemService
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.dsvag.currencyexchanger.data.adapters.CoinAdapter
 import com.dsvag.currencyexchanger.data.utils.getAppComponent
 import com.dsvag.currencyexchanger.databinding.ActivityMainBinding
+import com.jakewharton.rxbinding4.widget.textChanges
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
+import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
 
@@ -21,14 +20,18 @@ class MainActivity : AppCompatActivity() {
 
     private val repository by lazy { getAppComponent().coinRepository }
 
-    private val adapter = CoinAdapter()
+    private val keyBoardUtils by lazy { getAppComponent().keyBoardUtils }
+
+    private val adapter by lazy { CoinAdapter(keyBoardUtils) }
 
     private val disposable = CompositeDisposable()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+
         initRecyclerview()
+        initSearchBar()
 
         apiCall()
     }
@@ -41,11 +44,14 @@ class MainActivity : AppCompatActivity() {
     private fun apiCall() {
         repository.getCoins()
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({
-                adapter.setData(it)
-            }, {
+            .subscribe({ adapter.setData(it) }, { })
+            .addTo(disposable)
+    }
 
-            })
+    private fun initSearchBar() {
+        binding.searchBar.textChanges()
+            .debounce(300, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
+            .subscribe({ adapter.filterOut(it.toString().toLowerCase()) }, {}, {})
             .addTo(disposable)
     }
 
@@ -61,20 +67,11 @@ class MainActivity : AppCompatActivity() {
                 super.onScrollStateChanged(recyclerView, newState)
                 when (newState) {
                     RecyclerView.SCROLL_STATE_DRAGGING -> {
-                        hideKeyboard()
+                        keyBoardUtils.hideKeyBoard(binding.root)
                     }
                 }
             }
         })
-    }
-
-    private fun hideKeyboard() {
-        try {
-            val inputMethodManager = getSystemService<InputMethodManager>()!!
-            inputMethodManager.hideSoftInputFromWindow(currentFocus!!.windowToken, 0)
-        } catch (e: Exception) {
-            Log.e(TAG, "closeKeyboard: $e")
-        }
     }
 
     companion object {
