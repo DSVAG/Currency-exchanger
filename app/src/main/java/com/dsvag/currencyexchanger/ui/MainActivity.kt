@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity() {
 
     private val keyBoardUtils by lazy { getAppComponent().keyBoardUtils }
 
-    private val adapter = CoinAdapter(keyBoardUtils)
+    private val adapter by lazy { CoinAdapter(keyBoardUtils) }
 
     private val disposable = CompositeDisposable()
 
