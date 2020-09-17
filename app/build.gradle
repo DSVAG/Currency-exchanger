@@ -71,4 +71,10 @@ dependencies {
     implementation "androidx.room:room-ktx:$roomVersion"
     implementation "androidx.room:room-rxjava3:$roomVersion"
     kapt "androidx.room:room-compiler:$roomVersion"
+
+    //BadooMviCore
+    def mviCoreVersion = "1.2.4"
+    implementation "com.github.badoo.mvicore:mvicore:$mviCoreVersion"
+    implementation "com.github.badoo.mvicore:mvicore-android:$mviCoreVersion"
+    implementation "com.github.badoo.mvicore:mvicore-diff:$mviCoreVersion"
 }
