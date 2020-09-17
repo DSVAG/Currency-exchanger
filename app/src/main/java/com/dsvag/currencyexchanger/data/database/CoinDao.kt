@@ -8,7 +8,6 @@ import androidx.room.Query
 import com.dsvag.currencyexchanger.data.models.latest.Coin
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Flowable
-import io.reactivex.rxjava3.core.Single
 
 @Dao
 interface CoinDao {
@@ -19,8 +18,5 @@ interface CoinDao {
     fun deleteAll(coins: List<Coin>): Completable
 
     @Query("SELECT * FROM coin")
-    fun getCoins(): Single<List<Coin>>
-
-    @Query("SELECT * FROM coin")
-    fun subscribe(): Flowable<List<Coin>>
+    fun getCoins(): Flowable<List<Coin>>
 }

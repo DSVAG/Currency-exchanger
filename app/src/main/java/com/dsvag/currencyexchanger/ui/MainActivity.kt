@@ -1,6 +1,7 @@
 package com.dsvag.currencyexchanger.ui
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -50,6 +51,7 @@ class MainActivity : AppCompatActivity() {
             .doFinally {
                 binding.swipeRefresh.isRefreshing = false
             }
+            .doOnError { Toast.makeText(this, "Network problem", Toast.LENGTH_LONG).show() }
             .subscribe()
             .addTo(disposable)
     }

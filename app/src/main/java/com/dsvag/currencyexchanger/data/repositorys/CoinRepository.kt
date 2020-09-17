@@ -1,5 +1,6 @@
 package com.dsvag.currencyexchanger.data.repositorys
 
+import android.widget.Toast
 import com.dsvag.currencyexchanger.data.database.CoinDao
 import com.dsvag.currencyexchanger.data.models.latest.Coin
 import com.dsvag.currencyexchanger.data.network.ApiCoinData
@@ -24,7 +25,6 @@ class CoinRepository(
     }
 
     fun subToDb(): Flowable<List<Coin>> {
-        return coinDao.subscribe()
-            .subscribeOn(Schedulers.io())
+        return coinDao.getCoins()
     }
 }
