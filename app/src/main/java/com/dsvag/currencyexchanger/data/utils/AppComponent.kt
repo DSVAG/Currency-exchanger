@@ -14,8 +14,6 @@ import retrofit2.Retrofit
 import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 
-private const val key = "59716081-0648-4054-8631-56ad6bc21c92"
-
 class AppComponent(application: Application) {
 
     private val database by lazy {

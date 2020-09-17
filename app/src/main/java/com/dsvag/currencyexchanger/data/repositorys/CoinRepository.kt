@@ -3,6 +3,7 @@ package com.dsvag.currencyexchanger.data.repositorys
 import com.dsvag.currencyexchanger.data.database.CoinDao
 import com.dsvag.currencyexchanger.data.models.latest.Coin
 import com.dsvag.currencyexchanger.data.network.ApiCoinData
+import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers
 
@@ -20,8 +21,10 @@ class CoinRepository(
             .flatMap {
                 coinDao.insertAll(it.coins).toSingle { it.coins }
             }
-            .onErrorResumeNext {
-                coinDao.getCoins()
-            }
+    }
+
+    fun subToDb(): Flowable<List<Coin>> {
+        return coinDao.subscribe()
+            .subscribeOn(Schedulers.io())
     }
 }

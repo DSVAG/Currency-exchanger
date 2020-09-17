@@ -35,6 +35,8 @@ class MainActivity : AppCompatActivity() {
         initSwipeRefresh()
 
         apiCall()
+
+        dbSubscribe()
     }
 
     override fun onDestroy() {
@@ -48,7 +50,14 @@ class MainActivity : AppCompatActivity() {
             .doFinally {
                 binding.swipeRefresh.isRefreshing = false
             }
-            .subscribe({ adapter.setData(it) }, { })
+            .subscribe()
+            .addTo(disposable)
+    }
+
+    private fun dbSubscribe() {
+        repository.subToDb()
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({ adapter.setData(it) }, {}, {})
             .addTo(disposable)
     }
 
