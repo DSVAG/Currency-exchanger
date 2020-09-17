@@ -32,6 +32,7 @@ class MainActivity : AppCompatActivity() {
 
         initRecyclerview()
         initSearchBar()
+        initSwipeRefresh()
 
         apiCall()
     }
@@ -44,8 +45,17 @@ class MainActivity : AppCompatActivity() {
     private fun apiCall() {
         repository.getCoins()
             .observeOn(AndroidSchedulers.mainThread())
+            .doFinally {
+                binding.swipeRefresh.isRefreshing = false
+            }
             .subscribe({ adapter.setData(it) }, { })
             .addTo(disposable)
+    }
+
+    private fun initSwipeRefresh() {
+        binding.swipeRefresh.setOnRefreshListener {
+            apiCall()
+        }
     }
 
     private fun initSearchBar() {
