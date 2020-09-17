@@ -1,6 +1,7 @@
 package com.dsvag.currencyexchanger.ui
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -32,8 +33,11 @@ class MainActivity : AppCompatActivity() {
 
         initRecyclerview()
         initSearchBar()
+        initSwipeRefresh()
 
         apiCall()
+
+        dbSubscribe()
     }
 
     override fun onDestroy() {
@@ -44,8 +48,25 @@ class MainActivity : AppCompatActivity() {
     private fun apiCall() {
         repository.getCoins()
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({ adapter.setData(it) }, { })
+            .doFinally {
+                binding.swipeRefresh.isRefreshing = false
+            }
+            .doOnError { Toast.makeText(this, "Network problem", Toast.LENGTH_LONG).show() }
+            .subscribe()
             .addTo(disposable)
+    }
+
+    private fun dbSubscribe() {
+        repository.subToDb()
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({ adapter.setData(it) }, {}, {})
+            .addTo(disposable)
+    }
+
+    private fun initSwipeRefresh() {
+        binding.swipeRefresh.setOnRefreshListener {
+            apiCall()
+        }
     }
 
     private fun initSearchBar() {
