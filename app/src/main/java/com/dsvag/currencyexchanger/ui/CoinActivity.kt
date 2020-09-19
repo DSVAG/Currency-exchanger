@@ -6,10 +6,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.dsvag.currencyexchanger.data.adapters.CoinAdapter
-import com.dsvag.currencyexchanger.data.presenters.CoinPresenter
-import com.dsvag.currencyexchanger.data.states.CoinState
 import com.dsvag.currencyexchanger.data.di.getAppComponent
 import com.dsvag.currencyexchanger.databinding.ActivityCoinBinding
+import com.dsvag.currencyexchanger.mvi.State
 import com.jakewharton.rxbinding4.widget.textChanges
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -27,48 +26,30 @@ class CoinActivity : AppCompatActivity() {
 
     private val disposable = CompositeDisposable()
 
-    private val presenter = CoinPresenter()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
         initRecyclerview()
         initSearchBar()
-
-        presenter.bind(this)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         disposable.dispose()
-        presenter.unBind()
     }
 
-    fun render(state: CoinState) {
-        when (state) {
-            is CoinState.LoadingState -> renderLoadingState()
-            is CoinState.DataState -> renderDataState(state)
-            is CoinState.ErrorState -> renderErrorState(state)
+    fun render(state: State) {
+        binding.swipeRefresh.isRefreshing = state.isLoading
+        if (state.list.isNotEmpty()) {
+            adapter.setData(state.list)
         }
-    }
-
-    private fun renderLoadingState() {
-        binding.swipeRefresh.isRefreshing = true
-    }
-
-    private fun renderDataState(dataState: CoinState.DataState) {
-        binding.swipeRefresh.isRefreshing = false
-        adapter.setData(dataState.list)
-    }
-
-    private fun renderErrorState(errorState: CoinState.ErrorState) {
-        binding.swipeRefresh.isRefreshing = false
-
-        AlertDialog.Builder(this)
-            .setTitle("Error")
-            .setMessage(errorState.error)
-            .show()
+        if (state.error.isNotEmpty()) {
+            AlertDialog.Builder(this)
+                .setTitle("Error")
+                .setMessage(state.error)
+                .show()
+        }
     }
 
     private fun initSearchBar() {
@@ -95,6 +76,21 @@ class CoinActivity : AppCompatActivity() {
                 }
             }
         })
+    }
+
+    private fun apiCall() {
+        repository.getCoins()
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnError { }
+            .subscribe()
+            .addTo(disposable)
+    }
+
+    private fun dbSubscribe() {
+        repository.subToDb()
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe()
+            .addTo(disposable)
     }
 
     companion object {
