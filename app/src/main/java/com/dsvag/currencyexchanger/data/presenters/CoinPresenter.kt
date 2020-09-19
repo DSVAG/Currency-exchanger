@@ -2,7 +2,7 @@ package com.dsvag.currencyexchanger.data.presenters
 
 import com.dsvag.currencyexchanger.data.models.latest.Coin
 import com.dsvag.currencyexchanger.data.states.CoinState
-import com.dsvag.currencyexchanger.data.utils.getAppComponent
+import com.dsvag.currencyexchanger.data.di.getAppComponent
 import com.dsvag.currencyexchanger.ui.CoinActivity
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -16,7 +16,7 @@ class CoinPresenter {
 
     private val disposable = CompositeDisposable()
 
-    private var currentState: CoinState? = null
+    private var currentState: CoinState = CoinState.NoDataState
 
     fun bind(view: CoinActivity) {
         this.view = view
@@ -24,30 +24,36 @@ class CoinPresenter {
     }
 
     fun unBind() {
-
+        disposable.dispose()
     }
 
     private fun reduce(
-        previous: CoinState?,
+        previous: CoinState,
         list: List<Coin> = emptyList(),
         errorMsg: String = "",
     ): CoinState {
-        if (previous == null) {
-            apiCall()
-        }
-        if (list.isNotEmpty()) {
-            this.currentState = CoinState.DataState(list)
-        }
-        if (errorMsg.isNotEmpty()) {
-            this.currentState = CoinState.ErrorState(errorMsg)
+        when {
+            previous is CoinState.NoDataState -> {
+                apiCall()
+            }
+            previous is CoinState.LoadingState -> {
+                this.currentState = CoinState.LoadingState
+            }
+            list.isNotEmpty() -> {
+                this.currentState = CoinState.DataState(list)
+            }
+            errorMsg.isNotEmpty() -> {
+                this.currentState = CoinState.ErrorState(errorMsg)
+            }
         }
 
-        return this.currentState!!
+        return this.currentState
     }
 
     private fun apiCall() {
         repository.getCoins()
             .observeOn(AndroidSchedulers.mainThread())
+            .doOnError { view.render(reduce(currentState, errorMsg = it.toString())) }
             .subscribe()
             .addTo(disposable)
     }
@@ -55,9 +61,13 @@ class CoinPresenter {
     private fun dbSubscribe() {
         repository.subToDb()
             .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe {
+                view.render(CoinState.LoadingState)
+            }
             .subscribe({
-                view.render(reduce(currentState, it))
+                view.render(reduce(currentState, list = it))
             }, {
+                view.render(reduce(currentState, errorMsg = it.localizedMessage))
             })
             .addTo(disposable)
     }

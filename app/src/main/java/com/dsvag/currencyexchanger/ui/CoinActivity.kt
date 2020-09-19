@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.dsvag.currencyexchanger.data.adapters.CoinAdapter
 import com.dsvag.currencyexchanger.data.presenters.CoinPresenter
 import com.dsvag.currencyexchanger.data.states.CoinState
-import com.dsvag.currencyexchanger.data.utils.getAppComponent
+import com.dsvag.currencyexchanger.data.di.getAppComponent
 import com.dsvag.currencyexchanger.databinding.ActivityCoinBinding
 import com.jakewharton.rxbinding4.widget.textChanges
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -35,7 +35,6 @@ class CoinActivity : AppCompatActivity() {
 
         initRecyclerview()
         initSearchBar()
-        initSwipeRefresh()
 
         presenter.bind(this)
     }
@@ -70,11 +69,6 @@ class CoinActivity : AppCompatActivity() {
             .setTitle("Error")
             .setMessage(errorState.error)
             .show()
-    }
-
-    private fun initSwipeRefresh() {
-        binding.swipeRefresh.setOnRefreshListener {
-        }
     }
 
     private fun initSearchBar() {
