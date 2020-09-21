@@ -3,7 +3,7 @@ package com.dsvag.currencyexchanger.data.adapters
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.dsvag.currencyexchanger.data.models.latest.Coin
+import com.dsvag.currencyexchanger.data.models.dbCoins.Coin
 import com.dsvag.currencyexchanger.data.utils.KeyBoardUtils
 import com.dsvag.currencyexchanger.databinding.RowCoinBinding
 import com.jakewharton.rxbinding4.widget.textChanges
@@ -52,22 +52,6 @@ class CoinAdapter(private val keyBoardUtils: KeyBoardUtils) : RecyclerView.Adapt
         notifyDataSetChanged()
     }
 
-    fun filterOut(string: String) {
-        filterData.clear()
-
-        if (string.isNotEmpty()) {
-            data.forEach { coin ->
-                if (coin.slug.toLowerCase().contains(string) || coin.symbol.toLowerCase().contains(string)) {
-                    filterData.add(coin)
-                }
-            }
-        } else {
-            filterData.addAll(data)
-        }
-
-        notifyDataSetChanged()
-    }
-
     private fun moveToTop(position: Int) {
         filterData.add(0, filterData.removeAt(position))
         notifyItemMoved(position, 0)
@@ -75,7 +59,7 @@ class CoinAdapter(private val keyBoardUtils: KeyBoardUtils) : RecyclerView.Adapt
     }
 
     private fun reprice(usd: Double) {
-        val firstPrice = filterData.first().quote.usd.price
+        val firstPrice = filterData.first().price
         filterData.first().reprice(usd)
 
         filterData.forEachIndexed { index, coin ->
@@ -98,12 +82,11 @@ class CoinAdapter(private val keyBoardUtils: KeyBoardUtils) : RecyclerView.Adapt
         fun bind(coin: Coin) {
             itemBinding.name.text = coin.name
             itemBinding.symbol.text = coin.symbol
-            itemBinding.price.hint = coin.quote.usd.price.toString()
-            itemBinding.lastUpdate.text =
-                coin.quote.usd.lastUpdated.split("T")[1].replace(".000Z", "")
+            itemBinding.price.hint = coin.price.toString()
+            itemBinding.lastUpdate.text = coin.lastUpdated
 
-            if (coin.quote.usd.priceInAnotherCoin > 0) {
-                itemBinding.price.setText(coin.quote.usd.priceInAnotherCoin.toString())
+            if (coin.priceInAnotherCoin > 0) {
+                itemBinding.price.setText(coin.priceInAnotherCoin.toString())
             } else {
                 itemBinding.price.text?.clear()
             }

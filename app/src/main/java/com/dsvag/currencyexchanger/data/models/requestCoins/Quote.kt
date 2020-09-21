@@ -1,4 +1,4 @@
-package com.dsvag.currencyexchanger.data.models.latest
+package com.dsvag.currencyexchanger.data.models.requestCoins
 
 import com.google.gson.annotations.SerializedName
 

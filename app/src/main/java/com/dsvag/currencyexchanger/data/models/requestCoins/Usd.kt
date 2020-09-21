@@ -1,4 +1,4 @@
-package com.dsvag.currencyexchanger.data.models.latest
+package com.dsvag.currencyexchanger.data.models.requestCoins
 
 import com.google.gson.annotations.SerializedName
 
@@ -23,6 +23,4 @@ data class Usd(
 
     @SerializedName("last_updated")
     val lastUpdated: String,
-
-    var priceInAnotherCoin: Double = 0.0,
 )

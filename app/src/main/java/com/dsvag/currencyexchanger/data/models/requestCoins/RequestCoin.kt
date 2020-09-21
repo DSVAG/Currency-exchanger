@@ -1,15 +1,11 @@
-package com.dsvag.currencyexchanger.data.models.latest
+package com.dsvag.currencyexchanger.data.models.requestCoins
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
-import androidx.room.TypeConverters
-import com.dsvag.currencyexchanger.data.utils.Converters
+import com.dsvag.currencyexchanger.data.models.dbCoins.Coin
 import com.google.gson.annotations.SerializedName
 
-@Entity(tableName = "coin")
-data class Coin(
+data class RequestCoin(
     @SerializedName("id")
-    @PrimaryKey val id: Long,
+    val id: Long,
 
     @SerializedName("name")
     val name: String,
@@ -26,7 +22,6 @@ data class Coin(
     @SerializedName("date_added")
     val dateAdded: String,
 
-    @TypeConverters(Converters::class)
     @SerializedName("tags")
     val tags: List<String>,
 
@@ -39,7 +34,6 @@ data class Coin(
     @SerializedName("total_supply")
     val totalSupply: Double,
 
-    @TypeConverters(Converters::class)
     @SerializedName("platform")
     val platform: Platform?,
 
@@ -49,11 +43,18 @@ data class Coin(
     @SerializedName("last_updated")
     val lastUpdated: String,
 
-    @TypeConverters(Converters::class)
     @SerializedName("quote")
     val quote: Quote,
 ) {
-    fun reprice(usd: Double) {
-        quote.usd.priceInAnotherCoin = usd / quote.usd.price
+
+    fun toDbCoin(): Coin {
+        return Coin(
+            id,
+            name,
+            symbol,
+            slug,
+            quote.usd.lastUpdated.split("T")[1].replace(".000Z", ""),
+            quote.usd.price
+        )
     }
 }

@@ -1,5 +1,5 @@
 package com.dsvag.currencyexchanger.mvi
 
-import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.Flowable
 
-typealias Actor<State, Action, Effect> = (state: State, action: Action) -> Observable<Effect>
+typealias Actor<State, Action, Effect> = (state: State, action: Action) -> Flowable<Effect>

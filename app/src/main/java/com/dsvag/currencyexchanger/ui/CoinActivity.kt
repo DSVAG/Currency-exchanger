@@ -8,7 +8,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.dsvag.currencyexchanger.data.adapters.CoinAdapter
 import com.dsvag.currencyexchanger.data.di.getAppComponent
 import com.dsvag.currencyexchanger.databinding.ActivityCoinBinding
+import com.dsvag.currencyexchanger.mvi.Feature
 import com.dsvag.currencyexchanger.mvi.State
+import com.dsvag.currencyexchanger.mvi.Store
 import com.jakewharton.rxbinding4.widget.textChanges
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -24,6 +26,9 @@ class CoinActivity : AppCompatActivity() {
 
     private val adapter by lazy { CoinAdapter(keyBoardUtils) }
 
+    private val store
+            by lazy { Store(State(), Feature.ActorImpl(getAppComponent().coinRepository), Feature.ReducerImpl()) }
+
     private val disposable = CompositeDisposable()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,6 +37,12 @@ class CoinActivity : AppCompatActivity() {
 
         initRecyclerview()
         initSearchBar()
+        initSwipeRefresh()
+
+        store.observeState().subscribe(::render).addTo(disposable)
+
+        store.accept(Feature.Action.Init)
+        store.accept(Feature.Action.FetchCoins)
     }
 
     override fun onDestroy() {
@@ -39,23 +50,32 @@ class CoinActivity : AppCompatActivity() {
         disposable.dispose()
     }
 
-    fun render(state: State) {
+
+    private fun render(state: State) {
         binding.swipeRefresh.isRefreshing = state.isLoading
-        if (state.list.isNotEmpty()) {
-            adapter.setData(state.list)
-        }
+
+        adapter.setData(state.filteredCoins)
+
         if (state.error.isNotEmpty()) {
             AlertDialog.Builder(this)
                 .setTitle("Error")
                 .setMessage(state.error)
+                .setPositiveButton("Sumbit") { dialog, _ ->
+                    dialog.dismiss()
+                    store.accept(Feature.Action.ClearError)
+                }
                 .show()
         }
+    }
+
+    private fun initSwipeRefresh() {
+        binding.swipeRefresh.setOnRefreshListener { store.accept(Feature.Action.FetchCoins) }
     }
 
     private fun initSearchBar() {
         binding.searchBar.textChanges()
             .debounce(300, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
-            .subscribe({ adapter.filterOut(it.toString().toLowerCase()) }, {}, {})
+            .subscribe({ store.accept(Feature.Action.FilterCoins(it.toString())) }, {}, {})
             .addTo(disposable)
     }
 
@@ -76,21 +96,6 @@ class CoinActivity : AppCompatActivity() {
                 }
             }
         })
-    }
-
-    private fun apiCall() {
-        repository.getCoins()
-            .observeOn(AndroidSchedulers.mainThread())
-            .doOnError { }
-            .subscribe()
-            .addTo(disposable)
-    }
-
-    private fun dbSubscribe() {
-        repository.subToDb()
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe()
-            .addTo(disposable)
     }
 
     companion object {

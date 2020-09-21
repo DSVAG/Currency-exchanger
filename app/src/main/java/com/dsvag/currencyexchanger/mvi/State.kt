@@ -1,9 +1,11 @@
 package com.dsvag.currencyexchanger.mvi
 
-import com.dsvag.currencyexchanger.data.models.latest.Coin
+import com.dsvag.currencyexchanger.data.models.dbCoins.Coin
 
 data class State(
     val isLoading: Boolean = false,
-    val list: List<Coin> = emptyList(),
+    val coins: List<Coin> = emptyList(),
+    val filteredCoins: List<Coin> = emptyList(),
     val error: String = "",
+    val filterBy: String = "",
 )

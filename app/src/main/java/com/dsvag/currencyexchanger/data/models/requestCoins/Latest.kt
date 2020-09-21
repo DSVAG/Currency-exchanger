@@ -1,9 +1,9 @@
-package com.dsvag.currencyexchanger.data.models.latest
+package com.dsvag.currencyexchanger.data.models.requestCoins
 
 import com.google.gson.annotations.SerializedName
 
 data class Latest(
     val status: Status,
     @SerializedName("data")
-    val coins: List<Coin>,
+    val coins: List<RequestCoin>,
 )
