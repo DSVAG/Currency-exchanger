@@ -54,7 +54,7 @@ class CoinActivity : AppCompatActivity() {
     private fun render(state: State) {
         binding.swipeRefresh.isRefreshing = state.isLoading
 
-        adapter.setData(state.filteredCoins)
+        adapter.setData(state.filteredCoins, state.diffResult)
 
         if (state.error.isNotEmpty()) {
             AlertDialog.Builder(this)

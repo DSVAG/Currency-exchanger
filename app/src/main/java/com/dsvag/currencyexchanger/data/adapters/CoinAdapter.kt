@@ -2,6 +2,7 @@ package com.dsvag.currencyexchanger.data.adapters
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.dsvag.currencyexchanger.data.models.dbCoins.Coin
 import com.dsvag.currencyexchanger.data.utils.KeyBoardUtils
@@ -15,7 +16,6 @@ import java.util.concurrent.TimeUnit
 class CoinAdapter(private val keyBoardUtils: KeyBoardUtils) : RecyclerView.Adapter<CoinAdapter.CoinViewHolder>() {
 
     private var data: MutableList<Coin> = ArrayList()
-    private var filterData: MutableList<Coin> = ArrayList()
 
     private lateinit var recyclerView: RecyclerView
 
@@ -31,10 +31,12 @@ class CoinAdapter(private val keyBoardUtils: KeyBoardUtils) : RecyclerView.Adapt
     }
 
     override fun onBindViewHolder(holder: CoinViewHolder, position: Int) {
-        holder.bind(filterData[position])
+        holder.bind(data[position])
     }
 
-    override fun getItemCount(): Int = filterData.size
+    override fun getItemCount(): Int {
+        return data.size
+    }
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
@@ -42,27 +44,26 @@ class CoinAdapter(private val keyBoardUtils: KeyBoardUtils) : RecyclerView.Adapt
         this.recyclerView = recyclerView
     }
 
-    fun setData(data: List<Coin>) {
-        this.data.clear()
-        this.filterData.clear()
+    fun setData(newData: List<Coin>, diffResult: DiffUtil.DiffResult) {
+        diffResult.dispatchUpdatesTo(this)
 
-        this.data.addAll(data)
-        this.filterData.addAll(data)
+        data.clear()
+        data.addAll(newData)
 
         notifyDataSetChanged()
     }
 
     private fun moveToTop(position: Int) {
-        filterData.add(0, filterData.removeAt(position))
+        data.add(0, this.data.removeAt(position))
         notifyItemMoved(position, 0)
         recyclerView.scrollToPosition(0)
     }
 
     private fun reprice(usd: Double) {
-        val firstPrice = filterData.first().price
-        filterData.first().reprice(usd)
+        val firstPrice = data.first().price
+        data.first().reprice(usd)
 
-        filterData.forEachIndexed { index, coin ->
+        data.forEachIndexed { index, coin ->
             if (index != 0) {
                 coin.reprice(firstPrice * usd)
                 notifyItemChanged(index)
