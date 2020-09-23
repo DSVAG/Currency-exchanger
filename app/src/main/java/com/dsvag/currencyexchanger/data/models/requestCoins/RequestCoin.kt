@@ -2,6 +2,7 @@ package com.dsvag.currencyexchanger.data.models.requestCoins
 
 import com.dsvag.currencyexchanger.data.models.dbCoins.Coin
 import com.google.gson.annotations.SerializedName
+import java.math.BigDecimal
 
 data class RequestCoin(
     @SerializedName("id")
@@ -54,7 +55,7 @@ data class RequestCoin(
             symbol,
             slug,
             quote.usd.lastUpdated.split("T")[1].replace(".000Z", ""),
-            quote.usd.price
+            BigDecimal(quote.usd.price)
         )
     }
 }

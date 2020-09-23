@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.dsvag.currencyexchanger.data.adapters.CoinAdapter
+import com.dsvag.currencyexchanger.data.adapters.CoinAdapterCallback
 import com.dsvag.currencyexchanger.data.di.getAppComponent
 import com.dsvag.currencyexchanger.databinding.ActivityCoinBinding
 import com.dsvag.currencyexchanger.mvi.Feature
@@ -15,16 +16,28 @@ import com.jakewharton.rxbinding4.widget.textChanges
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
+import java.math.BigDecimal
 import java.util.concurrent.TimeUnit
 
 class CoinActivity : AppCompatActivity() {
 
-    private val binding
-            by lazy(LazyThreadSafetyMode.NONE) { ActivityCoinBinding.inflate(layoutInflater) }
+    private val binding by lazy(LazyThreadSafetyMode.NONE) { ActivityCoinBinding.inflate(layoutInflater) }
 
     private val keyBoardUtils by lazy { getAppComponent().keyBoardUtils }
 
-    private val adapter by lazy { CoinAdapter(keyBoardUtils) }
+    private val adapter by lazy {
+        CoinAdapter(keyBoardUtils,
+            object : CoinAdapterCallback {
+                override fun moveToTop(position: Int) {
+                    store.accept(Feature.Action.MoveToTop(position))
+                }
+
+                override fun reprice(usd: BigDecimal) {
+                    store.accept(Feature.Action.Reprice(usd))
+                }
+            }
+        )
+    }
 
     private val store
             by lazy { Store(State(), Feature.ActorImpl(getAppComponent().coinRepository), Feature.ReducerImpl()) }

@@ -11,9 +11,13 @@ import com.jakewharton.rxbinding4.widget.textChanges
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
+import java.math.BigDecimal
 import java.util.concurrent.TimeUnit
 
-class CoinAdapter(private val keyBoardUtils: KeyBoardUtils) : RecyclerView.Adapter<CoinAdapter.CoinViewHolder>() {
+class CoinAdapter(
+    private val keyBoardUtils: KeyBoardUtils,
+    private val coinAdapterCallback: CoinAdapterCallback,
+) : RecyclerView.Adapter<CoinAdapter.CoinViewHolder>() {
 
     private var data: MutableList<Coin> = ArrayList()
 
@@ -24,9 +28,8 @@ class CoinAdapter(private val keyBoardUtils: KeyBoardUtils) : RecyclerView.Adapt
 
         return CoinViewHolder(
             RowCoinBinding.inflate(inflater, parent, false),
-            ::moveToTop,
-            ::reprice,
             keyBoardUtils,
+            coinAdapterCallback,
         )
     }
 
@@ -45,37 +48,16 @@ class CoinAdapter(private val keyBoardUtils: KeyBoardUtils) : RecyclerView.Adapt
     }
 
     fun setData(newData: List<Coin>, diffResult: DiffUtil.DiffResult) {
-        diffResult.dispatchUpdatesTo(this)
-
         data.clear()
         data.addAll(newData)
 
-        notifyDataSetChanged()
-    }
-
-    private fun moveToTop(position: Int) {
-        data.add(0, this.data.removeAt(position))
-        notifyItemMoved(position, 0)
-        recyclerView.scrollToPosition(0)
-    }
-
-    private fun reprice(usd: Double) {
-        val firstPrice = data.first().price
-        data.first().reprice(usd)
-
-        data.forEachIndexed { index, coin ->
-            if (index != 0) {
-                coin.reprice(firstPrice * usd)
-                notifyItemChanged(index)
-            }
-        }
+        diffResult.dispatchUpdatesTo(this)
     }
 
     class CoinViewHolder(
         private val itemBinding: RowCoinBinding,
-        private val moveToTop: (position: Int) -> Unit,
-        private val reprice: (price: Double) -> Unit,
         private val keyBoardUtils: KeyBoardUtils,
+        private val coinAdapterCallback: CoinAdapterCallback,
     ) : RecyclerView.ViewHolder(itemBinding.root) {
 
         private var disposable = CompositeDisposable()
@@ -83,11 +65,11 @@ class CoinAdapter(private val keyBoardUtils: KeyBoardUtils) : RecyclerView.Adapt
         fun bind(coin: Coin) {
             itemBinding.name.text = coin.name
             itemBinding.symbol.text = coin.symbol
-            itemBinding.price.hint = coin.price.toString()
+            itemBinding.price.hint = coin.price.setScale(5, 5).stripTrailingZeros().toString()
             itemBinding.lastUpdate.text = coin.lastUpdated
 
-            if (coin.priceInAnotherCoin > 0) {
-                itemBinding.price.setText(coin.priceInAnotherCoin.toString())
+            if (coin.priceInAnotherCoin > BigDecimal.ZERO) {
+                itemBinding.price.setText(coin.priceInAnotherCoin.setScale(0, 5).stripTrailingZeros().toString())
             } else {
                 itemBinding.price.text?.clear()
             }
@@ -98,16 +80,19 @@ class CoinAdapter(private val keyBoardUtils: KeyBoardUtils) : RecyclerView.Adapt
 
             itemBinding.price.setOnFocusChangeListener { view, hasFocus ->
                 if (hasFocus) {
-                    itemBinding.price.text?.clear()
+                    itemBinding.price.setSelection(itemBinding.price.text.toString().length)
                     keyBoardUtils.showKeyBoard(view)
-
-                    moveToTop(adapterPosition)
+                    coinAdapterCallback.moveToTop(adapterPosition)
 
                     itemBinding.price.textChanges()
                         .debounce(300, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
-                        .subscribe({ reprice(it.toString().toDoubleOrNull() ?: 0.0) }, {}, {})
+                        .subscribe({
+                            coinAdapterCallback.reprice((it.toString().toBigDecimalOrNull() ?: BigDecimal.ZERO)
+                                .setScale(5, 5)
+                                .stripTrailingZeros()
+                            )
+                        }, {}, {})
                         .addTo(disposable)
-
                 } else {
                     disposable.dispose()
                 }
