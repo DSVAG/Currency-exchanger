@@ -2,20 +2,24 @@ package com.dsvag.currencyexchanger.data.adapters
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.dsvag.currencyexchanger.data.models.latest.Coin
+import com.dsvag.currencyexchanger.data.models.dbCoins.Coin
 import com.dsvag.currencyexchanger.data.utils.KeyBoardUtils
 import com.dsvag.currencyexchanger.databinding.RowCoinBinding
 import com.jakewharton.rxbinding4.widget.textChanges
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
+import java.math.BigDecimal
 import java.util.concurrent.TimeUnit
 
-class CoinAdapter(private val keyBoardUtils: KeyBoardUtils) : RecyclerView.Adapter<CoinAdapter.CoinViewHolder>() {
+class CoinAdapter(
+    private val keyBoardUtils: KeyBoardUtils,
+    private val coinAdapterCallback: CoinAdapterCallback,
+) : RecyclerView.Adapter<CoinAdapter.CoinViewHolder>() {
 
     private var data: MutableList<Coin> = ArrayList()
-    private var filterData: MutableList<Coin> = ArrayList()
 
     private lateinit var recyclerView: RecyclerView
 
@@ -24,17 +28,18 @@ class CoinAdapter(private val keyBoardUtils: KeyBoardUtils) : RecyclerView.Adapt
 
         return CoinViewHolder(
             RowCoinBinding.inflate(inflater, parent, false),
-            ::moveToTop,
-            ::reprice,
             keyBoardUtils,
+            coinAdapterCallback,
         )
     }
 
     override fun onBindViewHolder(holder: CoinViewHolder, position: Int) {
-        holder.bind(filterData[position])
+        holder.bind(data[position])
     }
 
-    override fun getItemCount(): Int = filterData.size
+    override fun getItemCount(): Int {
+        return data.size
+    }
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
@@ -42,55 +47,17 @@ class CoinAdapter(private val keyBoardUtils: KeyBoardUtils) : RecyclerView.Adapt
         this.recyclerView = recyclerView
     }
 
-    fun setData(data: List<Coin>) {
-        this.data.clear()
-        this.filterData.clear()
+    fun setData(newData: List<Coin>, diffResult: DiffUtil.DiffResult) {
+        data.clear()
+        data.addAll(newData)
 
-        this.data.addAll(data)
-        this.filterData.addAll(data)
-
-        notifyDataSetChanged()
-    }
-
-    fun filterOut(string: String) {
-        filterData.clear()
-
-        if (string.isNotEmpty()) {
-            data.forEach { coin ->
-                if (coin.slug.toLowerCase().contains(string) || coin.symbol.toLowerCase().contains(string)) {
-                    filterData.add(coin)
-                }
-            }
-        } else {
-            filterData.addAll(data)
-        }
-
-        notifyDataSetChanged()
-    }
-
-    private fun moveToTop(position: Int) {
-        filterData.add(0, filterData.removeAt(position))
-        notifyItemMoved(position, 0)
-        recyclerView.scrollToPosition(0)
-    }
-
-    private fun reprice(usd: Double) {
-        val firstPrice = filterData.first().quote.usd.price
-        filterData.first().reprice(usd)
-
-        filterData.forEachIndexed { index, coin ->
-            if (index != 0) {
-                coin.reprice(firstPrice * usd)
-                notifyItemChanged(index)
-            }
-        }
+        diffResult.dispatchUpdatesTo(this)
     }
 
     class CoinViewHolder(
         private val itemBinding: RowCoinBinding,
-        private val moveToTop: (position: Int) -> Unit,
-        private val reprice: (price: Double) -> Unit,
         private val keyBoardUtils: KeyBoardUtils,
+        private val coinAdapterCallback: CoinAdapterCallback,
     ) : RecyclerView.ViewHolder(itemBinding.root) {
 
         private var disposable = CompositeDisposable()
@@ -98,12 +65,11 @@ class CoinAdapter(private val keyBoardUtils: KeyBoardUtils) : RecyclerView.Adapt
         fun bind(coin: Coin) {
             itemBinding.name.text = coin.name
             itemBinding.symbol.text = coin.symbol
-            itemBinding.price.hint = coin.quote.usd.price.toString()
-            itemBinding.lastUpdate.text =
-                coin.quote.usd.lastUpdated.split("T")[1].replace(".000Z", "")
+            itemBinding.price.hint = coin.price.setScale(5, 5).stripTrailingZeros().toString()
+            itemBinding.lastUpdate.text = coin.lastUpdated
 
-            if (coin.quote.usd.priceInAnotherCoin > 0) {
-                itemBinding.price.setText(coin.quote.usd.priceInAnotherCoin.toString())
+            if (coin.priceInAnotherCoin > BigDecimal.ZERO) {
+                itemBinding.price.setText(coin.priceInAnotherCoin.setScale(0, 5).stripTrailingZeros().toString())
             } else {
                 itemBinding.price.text?.clear()
             }
@@ -114,16 +80,19 @@ class CoinAdapter(private val keyBoardUtils: KeyBoardUtils) : RecyclerView.Adapt
 
             itemBinding.price.setOnFocusChangeListener { view, hasFocus ->
                 if (hasFocus) {
-                    itemBinding.price.text?.clear()
+                    itemBinding.price.setSelection(itemBinding.price.text.toString().length)
                     keyBoardUtils.showKeyBoard(view)
-
-                    moveToTop(adapterPosition)
+                    coinAdapterCallback.moveToTop(adapterPosition)
 
                     itemBinding.price.textChanges()
                         .debounce(300, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
-                        .subscribe({ reprice(it.toString().toDoubleOrNull() ?: 0.0) }, {}, {})
+                        .subscribe({
+                            coinAdapterCallback.reprice((it.toString().toBigDecimalOrNull() ?: BigDecimal.ZERO)
+                                .setScale(5, 5)
+                                .stripTrailingZeros()
+                            )
+                        }, {}, {})
                         .addTo(disposable)
-
                 } else {
                     disposable.dispose()
                 }

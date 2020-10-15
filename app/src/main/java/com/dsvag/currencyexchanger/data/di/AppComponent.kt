@@ -1,4 +1,4 @@
-package com.dsvag.currencyexchanger.data.utils
+package com.dsvag.currencyexchanger.data.di
 
 import android.app.Application
 import android.view.inputmethod.InputMethodManager
@@ -8,6 +8,8 @@ import com.dsvag.currencyexchanger.data.database.CoinDao
 import com.dsvag.currencyexchanger.data.database.CoinDatabase
 import com.dsvag.currencyexchanger.data.network.ApiCoinData
 import com.dsvag.currencyexchanger.data.repositorys.CoinRepository
+import com.dsvag.currencyexchanger.data.utils.KeyBoardUtils
+import com.dsvag.currencyexchanger.data.utils.key
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit

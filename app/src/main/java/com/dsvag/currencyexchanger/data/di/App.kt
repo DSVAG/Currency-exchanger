@@ -1,4 +1,4 @@
-package com.dsvag.currencyexchanger.data.utils
+package com.dsvag.currencyexchanger.data.di
 
 import android.app.Application
 import android.content.Context

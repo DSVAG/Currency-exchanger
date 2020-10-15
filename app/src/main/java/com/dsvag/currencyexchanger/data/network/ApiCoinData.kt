@@ -1,6 +1,6 @@
 package com.dsvag.currencyexchanger.data.network
 
-import com.dsvag.currencyexchanger.data.models.latest.Latest
+import com.dsvag.currencyexchanger.data.models.requestCoins.Latest
 import io.reactivex.rxjava3.core.Single
 import retrofit2.http.GET
 import retrofit2.http.Query
